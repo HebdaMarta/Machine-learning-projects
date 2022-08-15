@@ -8,6 +8,7 @@ from sklearn.metrics import roc_auc_score, f1_score, accuracy_score
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import GridSearchCV
 import sklearn.model_selection as msel
+from matplotlib.pylab import rcParams
 
 data = pd.read_csv("heart.csv")
 data.info()
@@ -15,14 +16,12 @@ data.info()
 data = data.replace('?', np.NaN)
 print(data)
 
-# Usuwamy kolumny zawierające duże ilości brakujących danych
 columns_number = data.isna().sum(axis=0)
 print(columns_number)
 
 data = data.drop(['chol', 'slope', 'ca', 'thal'], axis = 1)
 data
 
-# Wypełniamy  brakowało jeszcze jakiś zmiennych
 data = data.fillna(method = 'backfill')
 
 #  Sprawdzenie
@@ -45,15 +44,12 @@ plt.show()
 y = data['num']
 x = data.drop(['num'], axis=1)
 
-# Dzielimy dane
-
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
 print("x_train shape: ", x_train.shape)
 print("x_test shape: ", x_test.shape)
 print("y_train shape: ", y_train.shape)
 print("y_test shape: ", y_test.shape)
 
-# Modele
 clf1 = xgb.XGBClassifier(objective="binary:logistic", max_depth=3,
                         learning_rate=0.01, n_estimators=25, use_label_encoder=False)
 clf2 = xgb.XGBClassifier(objective="binary:logistic", max_depth=3,
@@ -116,7 +112,7 @@ plt.plot(cv_results["test-logloss-mean"], color="r")
 plt.xlabel("Ilość klasyfikatorów")
 plt.ylabel("Wartość funkcji błędu logloss")
 plt.show()
-# Im niża wartość tym lepiej
+# The lower the value the better
 
 plt.figure(figsize=(15, 7))
 plt.title("Błąd na danych treningowych i testowych")
@@ -125,8 +121,7 @@ plt.plot(cv_results["test-auc-mean"], color="r")
 plt.xlabel("Ilość klasyfikatorów")
 plt.ylabel("Wartość funkcji błędu auc")
 plt.show()
-# Im wyższa wartość tym lepiej
-
+# The higher the value the better
 
 
 xgb_model = xgb.XGBClassifier(objective="binary:logistic", learning_rate = 0.5, n_estimators=7, max_depth=3, use_label_encoder=False)
@@ -136,7 +131,7 @@ y_pred = xgb_model.predict(x_test)
 accuracy = accuracy_score(y_test, y_pred)
 print("Accuracy: ", accuracy)
 
-#  Sprawdżmy jeszcze średnią 10 iteracji dla roc_auc
+#  Let's also check the average of 10 iterations for roc_auc
 model_auc = []
 
 for iteration in range(10):
@@ -149,9 +144,7 @@ for iteration in range(10):
 
 print("Średni wynik modelu: ", np.mean(model_auc))
 
-# Wykres ważności cech
-
-from matplotlib.pylab import rcParams
+# Feature importance graph
 
 rcParams['figure.figsize'] = 10, 8
 
